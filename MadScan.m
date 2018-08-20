@@ -27,13 +27,13 @@ Print["Package directory: "<>packdir];
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*CallHB*)
 
 
 CallHB[pathHB_,pathin_,list_,pdg_:{{25,35,36},{37}},nsca_:2, options_:"LandH effC"]:=Module[
 	{reps, HB, copy},
-	reps=Table[stockHB[list[[k]],pdg[[1]],pdg[[2]],Length[pdg[[1]]], Length[pdg[[2]]], nsca], {k, Length[list]}];
+	reps=Table[StockHB[list[[k]],pdg[[1]],pdg[[2]],Length[pdg[[1]]], Length[pdg[[2]]], nsca], {k, Length[list]}];
 	HB=GetOutputHB[pathHB, pathin, reps, Length[pdg[[1]]], Length[pdg[[2]]], options ];
 	copy=list;
 	Table[
@@ -42,7 +42,7 @@ CallHB[pathHB_,pathin_,list_,pdg_:{{25,35,36},{37}},nsca_:2, options_:"LandH eff
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*CallMadGraph*)
 
 
@@ -52,7 +52,7 @@ CallMadGraph[modelname_:"Flexible312",pathmg_,pathin_,namein_,blocks_, particles
 	reps=Table[stock[blocks[[k]]],{k,Length[blocks]}];
 	out=GetOutput[modelname,pathmg,pathin,namein,reps,particles,flags];
 	Table[
-		AppendTo[copied[[k]],{out[[1,k]], out[[2,1,k]],out[[2,3,k]],out[[2,3,k]]}],{k,Length[blocks]}
+		AppendTo[copied[[k]],{out[[1,k]], {out[[2,1,k]],out[[2,2,k]],out[[2,3,k]]}}],{k,Length[blocks]}
 	]
 ];
 
@@ -189,7 +189,7 @@ GetOutput[modelname_,pathmg_,pathin_,namein_,blocks_, particles_,flags_]:=Module
 	WriteCardScript[modelname,pathmg,pathin,namein,nums,particles,flags];
 	(*Create SM files with different Higgs masses*)
 	For[m=1,m<=3,m++,
-		SMnums=Table[ParamBlocks/.ReplacePart[blocks[[k]], {21}->mh1->(Keys[blocks[[k,20+m]]]/.blocks[[k,20+m]])]/.DefReps,{k,Length[blocks]}];
+		SMnums=Table[SMParamBlocks/.ReplacePart[blocks[[k]], {21}->mh1->(Keys[blocks[[k,20+m]]]/.blocks[[k,20+m]])]/.DefReps,{k,Length[blocks]}];
 		WriteCardScript["SM",pathmg,pathin,ToString[m]<>"_SM.dat",SMnums," h ",flags];
 	];
 	Print["Done Writting Files!"];
@@ -341,5 +341,10 @@ GetOutputHB[pathHB_,pathin_,input_,np_:3,cp_:1, options_:"LandH effC"]:=Module[{
 	Print[pathHB<>" "<>options<>" "<>ToString[np]<>" "<>ToString[cp]<>" "<>pathin<>"/"];
 	ReadHB[pathin,np,cp]
 ];
+
+
+(* ::Section::Closed:: *)
+(*End*)
+
 
 EndPackage[]

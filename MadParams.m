@@ -4,9 +4,9 @@ BeginPackage["MadParams`"]
 ParamBlocks::usage="Has the blocks for printing";
 SMParamBlocks::usage="Has the blocks for printing";
 DefReps::usage="Default replacement rules";
-DefBounds::usage="Default replacement rules for HiggsBounds";
+stock::usage="forms replacement rules for MadGraph input";
 BoundsParams::usage="Parameter and block names for HiggsBounds";
-Stock::usage="forms replacement rules for MadGraph input";
+DefBounds::usage="Default replacement rules for HiggsBounds";
 StockHB::usage="forms replacement rules for HiggsBounds input";
 
 
@@ -261,7 +261,7 @@ SMParamBlocks:={
 
 
 Begin["Private`"]
-DefReps={
+DefReps:={
 		PMNS -> Table[If[j===k,1,0],{j,4},{k,4}],
 		YUKAWAGD -> Table[0,{j,3},{k,3}],
 		YUKAWAGL -> Table[0,{j,3},{k,3}],
@@ -336,7 +336,7 @@ End[]
 (*Stock[]*)
 
 
-	Begin["Private`"]
+(*Begin["Private`"]*)
 	stock[block_]:={
 		PMNS -> block[[4,9]],
 		YUKAWAGD -> block[[4,8]],
@@ -408,7 +408,7 @@ End[]
 		wa1 -> 1,
 		whp -> 1
 	};
-	End[]
+(*End[]*)
 
 
 (* ::Section::Closed:: *)
@@ -467,7 +467,7 @@ DefBounds[np_,cp_]:={
 	g2hj -> Table[0,{j,np},{k,18}],
 	g2hjhiz -> Table[0,{j,np},{k,np}],
 	BRhjhh -> Table[0,{j,np},{k,np}],
-	BRtWpb->0,
+	BRtWpb -> 0,
 	BRtHpb -> Table[0,{j,cp}],
 	BRHpcs -> Table[0,{j,cp}],
 	BRHpcb -> Table[0,{j,cp}],
@@ -477,26 +477,22 @@ DefBounds[np_,cp_]:={
 End[]
 
 
-
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*StockHB[]*)
 
 
 Begin["Private`"]
-stockHB[input_, npdg_, cpdg_, np_, cp_, nsca_]:=Module[
-	{lst, smdecays ,fermionmass,
+	StockHB[inpt_, npdg_, cpdg_, np_, cp_, nsca_] := Module[
+	{lst, smdecays, fermionmass,
 	tMh, tMhGamma, tMhplus, tMhplusGamma, tg2hj, tg2hjhiz,
 	tBRhjhh, tBRtWpb, tBRtHpb, tBRHpcs, tBRHpcb, tBRHptaunu,
-	SMGamma, BR,BRSM, case={}, caseSM={},
-	Gammaferm={}, Gammabos={},
+	SMGamma, BR, BRSM, case={},
 	tHpb={}, neut={}, tHff={}, tBos={},
 	finalrep},
 	
-	lst={input[[1]],input[[2]],input[[3]],input[[4]],input[[5,1]]};
-	smdecays={#[[1]], #[[2]], Flatten[{#[[1]],Sort[ #[[2;;All]] ]},1]& /@Abs[#[[3]]] }& /@ input[[5,2]]; (*separate and prepare for usage. Sort Abs[PDGs]*)
+	lst={inpt[[1]],inpt[[2]],inpt[[3]],inpt[[4]],inpt[[5,1]]};
+	smdecays={#[[1]], #[[2]], Flatten[{#[[1]],Sort[ #[[2;;All]] ]},1]& /@Abs[#[[3]]] }& /@ inpt[[5,2]]; (*separate and prepare for usage. Sort Abs[PDGs]*)
 	SMGamma={smdecays[[1,2]],smdecays[[2,2]],smdecays[[3,2]]};
-	
-	Print[smdecays,"    \n  ", SMGamma, "  \n  ", lst[[5]] ];
 	
 	BR=0; BRSM=0;
 	
@@ -598,13 +594,15 @@ stockHB[input_, npdg_, cpdg_, np_, cp_, nsca_]:=Module[
 						][[1]];
 					If[j<=nsca,
 						(*scalar*)
-						tg2hj[[j, (2*m-1)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]),
+						tg2hj[[j, (2*m-1)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
+						Print["scalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (2*m-1)]] ],
 						(*pseudoscalar*)
-						tg2hj[[j, 2*m]]=(1-4*fermionmass[[m]]^2/tMh[[j]]^2)*BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]])
-					]
+						tg2hj[[j, 2*m]]=(1-4*fermionmass[[m]]^2/tMh[[j]]^2)*BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
+						Print["pseudoscalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, 2*m]] ]
+					];
+					BR=0;
+					BRSM=0;
 				];
-			
-
 			];
 			(*couplings to bosons*)
 			For[m=1,m<=Length[tBos], m++,
@@ -616,13 +614,18 @@ stockHB[input_, npdg_, cpdg_, np_, cp_, nsca_]:=Module[
 					BRSM=Flatten[
 							Cases[ Abs[smdecays[[j,3]]],Flatten[{a_, tBos[[m]]}]  ]
 						][[1]];	
-						tg2hj[[j, (12+m)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]])
+						tg2hj[[j, (12+m)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
+						Print["bosons\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (12+m)]] ];
+					BR=0;
+					BRSM=0;
 				]
 			]			
 		]	
 	
 	];
-	BR=0; neut={};
+	BR=0;
+	neut={};
+	
 	finalrep={
 		BRtWpb -> tBRtWpb,
 		BRtHpb -> tBRtHpb,
@@ -642,7 +645,7 @@ stockHB[input_, npdg_, cpdg_, np_, cp_, nsca_]:=Module[
 End[]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*End*)
 
 
