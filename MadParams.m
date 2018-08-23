@@ -332,7 +332,7 @@ DefReps:={
 End[]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Stock[]*)
 
 
@@ -376,7 +376,7 @@ End[]
 		M222IN -> block[[3,8]],
 		M112IN -> block[[3,9]],
 		M122IN -> block[[3,10]],
-		theta12IN -> If[ArcCos[block[[2,2,1]]]<0,  
+		theta12IN -> If[block[[2,2,1]]<0,  
 						-ArcSin[block[[2,2,2]]]+\[Pi]
 						,ArcSin[block[[2,2,2]]]
 					], 
@@ -428,7 +428,7 @@ BoundsParams[np_,cp_]:={
 	},
 	{"effC.dat",
 		Flatten[
-			{Table[g2hj[[j,k]],{j,np},{k,18}], Table[g2hjhiz[[j,k]],{j,np},{k,j}] }
+			{Transpose[Table[g2hj[[j,k]],{j,np},{k,18}]], Table[g2hjhiz[[j,k]],{j,np},{k,j}] }
 		]
 	},
 	{"BR_H_NP.dat",
@@ -567,7 +567,7 @@ Begin["Private`"]
 			tMhGamma[[j]]=case[[1,2]];
 			case={#[[1]], #[[2]], Flatten[{#[[1]],Sort[ #[[2;;All]] ]},1]& /@Abs[#[[3]]] }& /@ case; (*prepare data for readout*)
 			For[k=1, k<=np,k++,
-				neut=Sort[{npdg[[j]],npdg[[k]]}];
+				neut={npdg[[k]],npdg[[k]]};
 				(*Higgs to other Higgses branchings*)
 				If[MemberQ[Abs[case[[1,3]]], Flatten[{a_, neut}] ], (*check for the needed branching ratio*)
 					tBRhjhh[[j,k]]=Flatten[
@@ -594,11 +594,11 @@ Begin["Private`"]
 						][[1]];
 					If[j<=nsca,
 						(*scalar*)
-						tg2hj[[j, (2*m-1)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
-						Print["scalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (2*m-1)]] ],
+						tg2hj[[j, (2*m-1)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]])(*;
+						Print["scalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (2*m-1)]] ]*),
 						(*pseudoscalar*)
-						tg2hj[[j, 2*m]]=(1-4*fermionmass[[m]]^2/tMh[[j]]^2)*BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
-						Print["pseudoscalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, 2*m]] ]
+						tg2hj[[j, 2*m]]=(1-4*fermionmass[[m]]^2/tMh[[j]]^2)*BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]])(*;
+						Print["pseudoscalar!\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, 2*m]] ]*)
 					];
 					BR=0;
 					BRSM=0;
@@ -615,7 +615,7 @@ Begin["Private`"]
 							Cases[ Abs[smdecays[[j,3]]],Flatten[{a_, tBos[[m]]}]  ]
 						][[1]];	
 						tg2hj[[j, (12+m)]]=BR*tMhGamma[[j]]/(BRSM*SMGamma[[j]]);
-						Print["bosons\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (12+m)]] ];
+						(*Print["bosons\n","j m: ",j," and ",m,"\n BR: ",BR, "\n BRSM: ",BRSM,"\n tg2hj: ",tg2hj[[j, (12+m)]] ];*)
 					BR=0;
 					BRSM=0;
 				]

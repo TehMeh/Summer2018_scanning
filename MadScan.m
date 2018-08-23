@@ -15,6 +15,7 @@ Swapper::usage="Swaps scalars and pseudo scalars if needed. Use only right after
 CallHB::usage="Slightly cooler version of GetCoutputHB";
 CallMadGraph::usage="Slightly cooler version of GetCoutput";
 ZMassConstraints::usage="Deletes bad points";
+ReadAllCards::usage="Reads all the cards + SM ";
 
 (*FindHiggsRandom::usage="Gets a random point andd gradient descends to a physical Higgs";
 FindHiggsRelation::usage="Uses tree level relations of the Higgs potential parameters and uses the gradient descent to get to a physical Higgs";
@@ -27,7 +28,7 @@ Print["Package directory: "<>packdir];
 
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*CallHB*)
 
 
@@ -177,7 +178,7 @@ ReadCard[pathin_,namein_,amount_]:=Module[{filename,stre,first, br, width, entry
 End[]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*GetOutput From MadGraph*)
 
 
@@ -201,9 +202,20 @@ GetOutput[modelname_,pathmg_,pathin_,namein_,blocks_, particles_,flags_]:=Module
 	];
 	Print["Width Calculation Complete!"];
 	(*Get all the output! Only the Higgs from SM; {Normal, {SM1,SM2,SM3...}}*)
-	{ReadCard[pathin, namein, Length[nums] ],
-	Table[ Cases[ReadCard[pathin, ToString[k]<>"_SM.dat", Length[nums] ],{25, a_, {b___}},2], {k, 3}]}
+	ReadAllCards[pathin,namein,Length[nums]]
 ];
+
+
+(* ::Section::Closed:: *)
+(*ReadAllCards*)
+
+
+Begin["Private`"]
+ReadAllCards[pathin_, namein_, number_]:=Module[{},
+{ReadCard[pathin, namein, number ],
+	Table[ Cases[ReadCard[pathin, ToString[k]<>"_SM.dat", number ],{25, a_, {b___}},2], {k, 3}]}
+];
+End[]
 
 
 (* ::Section::Closed:: *)
@@ -306,7 +318,7 @@ Swapper[data_]:=If[#[[2,3,1]]===0. && #[[2,3,2]]===0.,
 				]&/@data;
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Constraints*)
 
 
@@ -315,13 +327,13 @@ ZMassConstraints[data_]:=Module[{},
 					If[ (*potential Requirements*)
 						#[[3,1]]>0 && #[[3,1]]<4*\[Pi] &&
 						#[[3,2]]>0 && #[[3,2]]<4*\[Pi] &&
-						#[[3,3]]>=0 && 
+						#[[3,3]]>=0  && 
 						#[[3,4]]>=0 && #[[3,4]]<4*\[Pi] &&
-						#[[3,6]]>=0 && #[[3,2]]<2*\[Pi] &&
-						#[[3,7]]>=0 && #[[3,2]]<2*\[Pi] &&
+						#[[3,6]]>=0 && #[[3,6]]<2*\[Pi] &&
+						#[[3,7]]>=0 && #[[3,7]]<2*\[Pi] &&
 						#[[3,3]]^2<=#[[3,1]]*#[[3,2]] &&
 						Abs[#[[3,5]]]<=#[[3,4]] &&
-						Sqrt[#[[3,8]]+246.22^2*#[[3,3]]]/2>200 && Sqrt[#[[3,8]]+246.22^2*#[[3,3]]]/2<2000 &&
+						#[[3,8]]+246.22^2*#[[3,3]]/2>200^2 && #[[3,8]]+246.22^2*#[[3,3]]/2<2000^2 &&
 						(*mass requirements*)
 						#[[1,3]]>150 && #[[1,4]]>150 && #[[1,6]]>200
 						, #
